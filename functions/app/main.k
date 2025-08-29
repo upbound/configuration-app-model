@@ -5,15 +5,38 @@ import k8sResources.serviceaccount as serviceaccount
 import k8sResources.ingress as ingress
 import k8sResources.hpa as hpa
 
-import models.io.crossplane.kubernetes.v1alpha1 as kubev1alpha1
 
 oxr = option("params").oxr
 _ocds = option("params").ocds
 _dxr = option("params").dxr
 dcds = option("params").dcds
 
+# Function to check if a resource is ready based on its kind
+_isResourceReady = lambda name: str -> bool {
+    observed_resource = option("params").ocds[name]?.Resource
+    _is_ready = False
+
+    # Check Deployment readiness - Available condition is True
+    _is_ready = True if observed_resource?.kind == "Deployment" and any_true([c.type == "Available" and c.status == "True" for c in observed_resource?.status?.conditions or []]) else _is_ready
+
+    # Check Service readiness - has clusterIP
+    _is_ready = True if observed_resource?.kind == "Service" and observed_resource?.spec?.clusterIP else _is_ready
+
+    # Check ServiceAccount readiness - exists (has metadata.uid)
+    _is_ready = True if observed_resource?.kind == "ServiceAccount" and observed_resource?.metadata?.uid else _is_ready
+
+    # Check Ingress readiness - has loadBalancer status with hostname or IP
+    _is_ready = True if observed_resource?.kind == "Ingress" and (observed_resource?.status?.loadBalancer?.ingress?[0]?.hostname or observed_resource?.status?.loadBalancer?.ingress?[0]?.ip) else _is_ready
+
+    _is_ready
+}
+
 _metadata = lambda name: str -> any {
-    { annotations = { "krm.kcl.dev/composition-resource-name" = name }}
+    { annotations = {
+        "krm.kcl.dev/composition-resource-name" = name } | ({ 
+            "krm.kcl.dev/ready" = "True"
+        } if _isResourceReady(name) else {})
+    }
 }
 
 # Extract configuration from XR spec (defaults are handled by XRD)
@@ -72,20 +95,20 @@ _createWorkloadResources = lambda workloadName: str, workloadConfig: any -> [any
         service = workloadConfig.service
     }
 
-#    _ingressInput = {
-#        metadata = _metadata("${workloadName}-ingress") | _commonMetadata
-#        name = workloadName
-#        namespace = _namespace
-#        ingress = workloadConfig.ingress
-#        service = workloadConfig.service
-#    }
-#
-#    _hpaInput = {
-#        metadata = _metadata("${workloadName}-hpa") | _commonMetadata
-#        name = workloadName
-#        namespace = _namespace
-#        autoscaling = workloadConfig.autoscaling
-#    }
+    _ingressInput = {
+        metadata = _metadata("${workloadName}-ingress") | _commonMetadata
+        name = workloadName
+        namespace = _namespace
+        ingress = workloadConfig.ingress
+        service = workloadConfig.service
+    }
+
+    _hpaInput = {
+        metadata = _metadata("${workloadName}-hpa") | _commonMetadata
+        name = workloadName
+        namespace = _namespace
+        autoscaling = workloadConfig.autoscaling
+    }
 
     # Generate resources for this workload
     [
@@ -93,8 +116,8 @@ _createWorkloadResources = lambda workloadName: str, workloadConfig: any -> [any
             serviceaccount.getServiceAccount(_serviceAccountInput),
             service.getService(_serviceInput),
             deployment.getDeployment(_deploymentInput),
-#            ingress.getIngress(_ingressInput),
-#            hpa.getHPA(_hpaInput)
+            ingress.getIngress(_ingressInput),
+            hpa.getHPA(_hpaInput)
         ] if resource != {}
     ]
 }

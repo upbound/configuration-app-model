@@ -1,16 +1,20 @@
 apiVersion: apiextensions.crossplane.io/v1
 kind: Composition
 metadata:
-  name: xapps.platform.upbound.io
+  name: apps.platform.upbound.io
 spec:
   compositeTypeRef:
     apiVersion: platform.upbound.io/v1
-    kind: XApp
+    kind: App
   mode: Pipeline
+  apiDependencies:
+  - k8s:
+      version: v1.33.0
+    type: k8s
   pipeline:
   - functionRef:
-      name: upbound-configuration-app-modelxapp
-    step: xapp
+      name: upbound-configuration-app-modelapp
+    step: app
   - functionRef:
       name: crossplane-contrib-function-auto-ready
     step: crossplane-contrib-function-auto-ready

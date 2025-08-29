@@ -1,17 +1,15 @@
 apiVersion: apiextensions.crossplane.io/v1
 kind: CompositeResourceDefinition
 metadata:
-  name: xapps.platform.upbound.io
+  name: apps.platform.upbound.io
 spec:
-  claimNames:
-    kind: App
-    plural: apps
   group: platform.upbound.io
+  scope: Namespaced
   names:
     categories:
     - crossplane
-    kind: XApp
-    plural: xapps
+    kind: App
+    plural: apps
   versions:
   - name: v1
     referenceable: true
@@ -105,6 +103,10 @@ spec:
                             type: object
                           podSecurityContext:
                             type: object
+                          providerConfigName:
+                            description: Name of the ProviderConfig to use for Kubernetes resources
+                            type: string
+                            default: "default"
                           readinessProbe:
                             properties:
                               httpGet:

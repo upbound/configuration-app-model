@@ -1,0 +1,143 @@
+apiVersion: platform.upbound.io/v1
+kind: App
+metadata:
+  name: example-full
+  namespace: default
+spec:
+  parameters:
+    workloads:
+      app1:
+        replicaCount: 2
+        namespace: test-namespace
+
+        image:
+          repository: nginx
+          pullPolicy: IfNotPresent
+          tag: "1.21"
+
+        imagePullSecrets: []
+        nameOverride: ""
+        fullnameOverride: ""
+
+        serviceAccount:
+          # Specifies whether a service account should be created
+          create: true
+          # Automatically mount a ServiceAccount's API credentials?
+          automount: true
+          # Annotations to add to the service account
+          annotations: 
+            eks.amazonaws.com/role-arn: "arn:aws:iam::123456789012:role/my-role"
+          # The name of the service account to use.
+          name: "my-service-account"
+
+        podAnnotations: 
+          prometheus.io/scrape: "true"
+          prometheus.io/port: "80"
+        podLabels: 
+          environment: "production"
+          tier: "frontend"
+
+        podSecurityContext: 
+          fsGroup: 2000
+
+        securityContext: 
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1000
+
+        service:
+          type: ClusterIP
+          port: 80
+
+        ingress:
+          enabled: true
+          className: "nginx"
+          annotations: 
+            kubernetes.io/ingress.class: nginx
+            kubernetes.io/tls-acme: "true"
+            cert-manager.io/cluster-issuer: "letsencrypt-prod"
+          hosts:
+            - host: chart-example.local
+              paths:
+                - path: /
+                  pathType: ImplementationSpecific
+            - host: api.example.com
+              paths:
+                - path: /api
+                  pathType: Prefix
+          tls:
+            - secretName: chart-example-tls
+              hosts:
+                - chart-example.local
+            - secretName: api-example-tls
+              hosts:
+                - api.example.com
+
+        resources: 
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: http
+          initialDelaySeconds: 5
+          periodSeconds: 5
+
+        autoscaling:
+          enabled: false
+          minReplicas: 1
+          maxReplicas: 100
+          targetCPUUtilizationPercentage: 80
+
+        # Additional volumes on the output Deployment definition.
+        volumes:
+        - name: config-volume
+          configMap:
+            name: my-config
+        - name: secret-volume
+          secret:
+            secretName: my-secret
+            optional: false
+
+        # Additional volumeMounts on the output Deployment definition.
+        volumeMounts:
+        - name: config-volume
+          mountPath: "/etc/config"
+          readOnly: true
+        - name: secret-volume
+          mountPath: "/etc/secrets"
+          readOnly: true
+
+        nodeSelector: 
+          kubernetes.io/arch: amd64
+          node-type: compute
+
+        tolerations:
+        - key: "dedicated"
+          operator: "Equal"
+          value: "gpu"
+          effect: "NoSchedule"
+
+        affinity: 
+          nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+              - matchExpressions:
+                - key: kubernetes.io/arch
+                  operator: In
+                  values:
+                  - amd64
