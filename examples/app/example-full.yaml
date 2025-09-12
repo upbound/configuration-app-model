@@ -122,9 +122,6 @@ spec:
           mountPath: "/etc/secrets"
           readOnly: true
 
-        nodeSelector: 
-          kubernetes.io/arch: amd64
-          node-type: compute
 
         tolerations:
         - key: "dedicated"
@@ -132,12 +129,4 @@ spec:
           value: "gpu"
           effect: "NoSchedule"
 
-        affinity: 
-          nodeAffinity:
-            requiredDuringSchedulingIgnoredDuringExecution:
-              nodeSelectorTerms:
-              - matchExpressions:
-                - key: kubernetes.io/arch
-                  operator: In
-                  values:
-                  - amd64
+

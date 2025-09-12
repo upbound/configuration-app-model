@@ -27,6 +27,31 @@ spec:
                       app1:
                         properties:
                           affinity:
+                            properties:
+                              nodeAffinity:
+                                properties:
+                                  requiredDuringSchedulingIgnoredDuringExecution:
+                                    properties:
+                                      nodeSelectorTerms:
+                                        items:
+                                          properties:
+                                            matchExpressions:
+                                              items:
+                                                properties:
+                                                  key:
+                                                    type: string
+                                                  operator:
+                                                    type: string
+                                                  values:
+                                                    items:
+                                                      type: string
+                                                    type: array
+                                                type: object
+                                              type: array
+                                          type: object
+                                        type: array
+                                    type: object
+                                type: object
                             type: object
                           autoscaling:
                             properties:
@@ -57,6 +82,8 @@ spec:
                           ingress:
                             properties:
                               annotations:
+                                additionalProperties:
+                                  type: string
                                 type: object
                               className:
                                 type: string
@@ -80,6 +107,13 @@ spec:
                                 type: array
                               tls:
                                 items:
+                                  properties:
+                                    hosts:
+                                      items:
+                                        type: string
+                                      type: array
+                                    secretName:
+                                      type: string
                                   type: object
                                 type: array
                             type: object
@@ -92,16 +126,31 @@ spec:
                                   port:
                                     type: string
                                 type: object
+                              initialDelaySeconds:
+                                type: integer
+                              periodSeconds:
+                                type: integer
                             type: object
                           nameOverride:
                             type: string
+                          namespace:
+                            type: string
                           nodeSelector:
+                            additionalProperties:
+                              type: string
                             type: object
                           podAnnotations:
+                            additionalProperties:
+                              type: string
                             type: object
                           podLabels:
+                            additionalProperties:
+                              type: string
                             type: object
                           podSecurityContext:
+                            properties:
+                              fsGroup:
+                                type: integer
                             type: object
                           providerConfigName:
                             description: Name of the ProviderConfig to use for Kubernetes resources
@@ -116,12 +165,39 @@ spec:
                                   port:
                                     type: string
                                 type: object
+                              initialDelaySeconds:
+                                type: integer
+                              periodSeconds:
+                                type: integer
                             type: object
                           replicaCount:
                             type: number
                           resources:
+                            properties:
+                              limits:
+                                additionalProperties:
+                                  type: string
+                                type: object
+                              requests:
+                                additionalProperties:
+                                  type: string
+                                type: object
                             type: object
                           securityContext:
+                            properties:
+                              capabilities:
+                                properties:
+                                  drop:
+                                    items:
+                                      type: string
+                                    type: array
+                                type: object
+                              readOnlyRootFilesystem:
+                                type: boolean
+                              runAsNonRoot:
+                                type: boolean
+                              runAsUser:
+                                type: integer
                             type: object
                           service:
                             properties:
@@ -133,6 +209,8 @@ spec:
                           serviceAccount:
                             properties:
                               annotations:
+                                additionalProperties:
+                                  type: string
                                 type: object
                               automount:
                                 type: boolean
@@ -143,14 +221,45 @@ spec:
                             type: object
                           tolerations:
                             items:
+                              properties:
+                                effect:
+                                  type: string
+                                key:
+                                  type: string
+                                operator:
+                                  type: string
+                                value:
+                                  type: string
                               type: object
                             type: array
                           volumeMounts:
                             items:
+                              properties:
+                                mountPath:
+                                  type: string
+                                name:
+                                  type: string
+                                readOnly:
+                                  type: boolean
                               type: object
                             type: array
                           volumes:
                             items:
+                              properties:
+                                configMap:
+                                  properties:
+                                    name:
+                                      type: string
+                                  type: object
+                                name:
+                                  type: string
+                                secret:
+                                  properties:
+                                    optional:
+                                      type: boolean
+                                    secretName:
+                                      type: string
+                                  type: object
                               type: object
                             type: array
                         type: object
