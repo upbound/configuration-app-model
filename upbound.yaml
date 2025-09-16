@@ -16,10 +16,15 @@ spec:
     kind: Provider
     package: xpkg.upbound.io/upbound/provider-kubernetes
     version: v0
-  description: This is where you can describe your project.
+  description: Upbound configuration for deploying cloud-native applications with
+    Kubernetes-based infrastructure, inspired by default Helm chart patterns. Designed
+    for Crossplane v2 with namespaced composite resources.
   license: Apache-2.0
-  maintainer: Upbound User <user@example.com>
+  maintainer: Upbound <support@upbound.io>
   readme: |
-    This is where you can add a readme for your project.
+    This repository provides a comprehensive application deployment model with configurable
+    parameters for workloads, scaling, networking, and security. The App API simplifies
+    Kubernetes application deployment through Crossplane compositions, supporting features
+    like autoscaling, ingress, security contexts, and volume management.
   repository: xpkg.upbound.io/upbound/configuration-app-model
-  source: github.com/upbound/project-template
+  source: github.com/upbound/configuration-app-model
