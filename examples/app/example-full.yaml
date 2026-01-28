@@ -2,13 +2,12 @@ apiVersion: platform.upbound.io/v1
 kind: App
 metadata:
   name: example-full
-  namespace: default
+  namespace: test-namespace
 spec:
   parameters:
     workloads:
       app1:
         replicaCount: 2
-        namespace: test-namespace
 
         image:
           repository: nginx

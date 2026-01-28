@@ -44,8 +44,6 @@ _workloads = oxr.spec.parameters.workloads if oxr.spec?.parameters?.workloads el
 
 # Function to create resources for a single workload
 _createWorkloadResources = lambda workloadName: str, workloadConfig: any -> [any] {
-    _namespace = workloadConfig.namespace if workloadConfig.namespace else None
-
     # Generate common metadata for this workload
     _commonMetadata = {
         labels = {
@@ -60,14 +58,12 @@ _createWorkloadResources = lambda workloadName: str, workloadConfig: any -> [any
     _serviceAccountInput = {
         metadata = _metadata("${workloadName}-serviceaccount") | _commonMetadata
         name = workloadName
-        namespace = _namespace
         serviceAccount = workloadConfig.serviceAccount
     }
 
     _deploymentInput = {
         metadata = _metadata("${workloadName}-deployment") | _commonMetadata
         name = workloadName
-        namespace = _namespace
         replicaCount = workloadConfig.replicaCount
         image = workloadConfig.image
         imagePullSecrets = workloadConfig.imagePullSecrets
@@ -91,14 +87,12 @@ _createWorkloadResources = lambda workloadName: str, workloadConfig: any -> [any
     _serviceInput = {
         metadata = _metadata("${workloadName}-service") | _commonMetadata
         name = workloadName
-        namespace = _namespace
         service = workloadConfig.service
     }
 
     _ingressInput = {
         metadata = _metadata("${workloadName}-ingress") | _commonMetadata
         name = workloadName
-        namespace = _namespace
         ingress = workloadConfig.ingress
         service = workloadConfig.service
     }
@@ -106,7 +100,6 @@ _createWorkloadResources = lambda workloadName: str, workloadConfig: any -> [any
     _hpaInput = {
         metadata = _metadata("${workloadName}-hpa") | _commonMetadata
         name = workloadName
-        namespace = _namespace
         autoscaling = workloadConfig.autoscaling
     }
 
