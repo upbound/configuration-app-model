@@ -7,10 +7,6 @@ spec:
     apiVersion: platform.upbound.io/v1
     kind: App
   mode: Pipeline
-  apiDependencies:
-  - k8s:
-      version: v1.33.0
-    type: k8s
   pipeline:
   - functionRef:
       name: upbound-configuration-app-modelapp
